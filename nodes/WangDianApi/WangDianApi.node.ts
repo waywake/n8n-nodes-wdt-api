@@ -167,11 +167,13 @@ export class WangDianApi implements INodeType {
 			body,
 		};
 
+		console.debug('wdt request options:', options);
 		const result: any = await this.helpers.request(options);
 		if (!result) {
 			throw new NodeOperationError(this.getNode(), 'invalid response');
 		}
 
+		console.debug('wdt response:', result);
 		if (result.status > 0) {
 			throw new NodeOperationError(
 				this.getNode(),
