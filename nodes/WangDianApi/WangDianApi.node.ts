@@ -130,9 +130,6 @@ export class WangDianApi implements INodeType {
 			throw new NodeOperationError(this.getNode(), '接口Secret格式错误，应该是"secret:salt"格式');
 		}
 
-		const pageIndex = (this.getNodeParameter('pageIndex', 0) || 0) as number;
-		const pageSize = (this.getNodeParameter('pageSize', 0) || 10) as number;
-		const calcTotal = (this.getNodeParameter('calcTotal', 0) || true) as boolean;
 		const bodyStr = this.getNodeParameter('body', 0) as string;
 
 		const [secret, salt] = appSecret.split(':');
@@ -145,6 +142,10 @@ export class WangDianApi implements INodeType {
 		data['v'] = '1.0';
 
 		if (operation === 'query') {
+			const pageIndex = (this.getNodeParameter('pageIndex', 0) || 0) as number;
+			const pageSize = (this.getNodeParameter('pageSize', 0) || 10) as number;
+			const calcTotal = (this.getNodeParameter('calcTotal', 0) || true) as boolean;
+
 			data['page_no'] = pageIndex.toString();
 			data['page_size'] = pageSize.toString();
 			data['calc_total'] = calcTotal ? 1 : 0;
