@@ -279,15 +279,15 @@ export class WangDianApi implements INodeType {
 				name: 'pageNo',
 				type: 'number',
 				typeOptions: {
-					minValue: 1,
+					minValue: 0,
 				},
 				displayOptions: {
 					show: {
 						pagerEnabled: [true],
 					},
 				},
-				default: 1,
-				description: '页码，从 1 开始。',
+				default: 0,
+				description: '页码，从 0 开始。',
 			},
 			{
 				displayName: '每页数量',
@@ -362,7 +362,7 @@ export class WangDianApi implements INodeType {
 			};
 			if (pagerEnabled) {
 				options.pager = {
-					pageNo: this.getNodeParameter('pageNo', itemIndex, 1) as number,
+					pageNo: this.getNodeParameter('pageNo', itemIndex, 0) as number,
 					pageSize: this.getNodeParameter('pageSize', itemIndex, 40) as number,
 					calcTotal: this.getNodeParameter('calcTotal', itemIndex, false) as boolean,
 				};
