@@ -123,9 +123,7 @@ function buildParamField(opt: WdtEndpointOption): INodeProperties {
 
 	const values: INodeProperties[] = meta.fields.map((field) => {
 		const tsHint =
-			field.type === 'json' && field.tsType !== 'json'
-				? ` (TS 类型: ${field.tsType})`
-				: '';
+			field.type === 'json' && field.tsType !== 'json' ? ` (TS 类型: ${field.tsType})` : '';
 		const requiredHint = field.optional ? '' : ' [必填]';
 		const property: INodeProperties = {
 			displayName: field.optional ? field.displayName : `${field.displayName} *`,
@@ -266,8 +264,7 @@ export class WangDianApi implements INodeType {
 						resource: [CUSTOM_RESOURCE],
 					},
 				},
-				description:
-					'请求体 JSON 对象，字段名使用 camelCase (SDK 会自动转换为 snake_case)。',
+				description: '请求体 JSON 对象，字段名使用 camelCase (SDK 会自动转换为 snake_case)。',
 			},
 			{
 				displayName: '启用分页',
@@ -474,7 +471,9 @@ function resolveRequestBody(
 	const raw = ctx.getNodeParameter(paramsFieldName(method), itemIndex, {}) as
 		| { values?: IDataObject }
 		| IDataObject;
-	const values = (raw && typeof raw === 'object' && 'values' in raw ? raw.values : {}) as IDataObject;
+	const values = (
+		raw && typeof raw === 'object' && 'values' in raw ? raw.values : {}
+	) as IDataObject;
 
 	// Strip empty-string defaults so we don't send noise to the API.
 	const cleaned: Record<string, unknown> = {};
@@ -495,8 +494,12 @@ function parseJsonBody(ctx: IExecuteFunctions, fieldName: string, itemIndex: num
 	try {
 		return JSON.parse(trimmed);
 	} catch (error) {
-		throw new NodeOperationError(ctx.getNode(), `请求参数不是合法 JSON：${(error as Error).message}`, {
-			itemIndex,
-		});
+		throw new NodeOperationError(
+			ctx.getNode(),
+			`请求参数不是合法 JSON：${(error as Error).message}`,
+			{
+				itemIndex,
+			},
+		);
 	}
 }
