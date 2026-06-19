@@ -7,7 +7,8 @@ n8n community nodes for the [旺店通旗舰版 OpenAPI](https://open.wangdian.c
 - **Full API coverage.** 184 endpoints across 6 categories (订单 / 售后 / 货品 / 基础 / 库存 / 采购) are auto-generated from the SDK's `WDT_ENDPOINTS` metadata. Run `bun run generate:endpoints` to refresh when the SDK ships new endpoints.
 - **Typed signing + transport.** Delegates to `@waywake/wdt-sdk`'s `WdtClient` — request body camelCase→snake_case conversion, MD5 signing, pager params, and error handling all match the official spec.
 - **Resource → Operation UX.** Pick a category and the matching operation dropdown appears. Each option surfaces the official doc description plus the SDK method identifier.
-- **Custom method escape hatch.** Need an endpoint the SDK doesn't know yet? Switch resource to `自定义` and type the method name directly.
+- **Structured request fields.** Every endpoint with a typed `Request` interface (182 of 184) gets a `请求参数` form auto-generated from the SDK's `endpoint-types.d.ts` — 875 named fields in total, each carrying its JSDoc description, required flag, and coarse type (string / number / boolean / JSON). Required fields are marked with `*` and `[必填]` in the description.
+- **Custom method escape hatch.** Need an endpoint the SDK doesn't know yet? Switch resource to `自定义` and type the method name + raw JSON body directly.
 - **Optional pager.** Toggle on for query endpoints to send `page_no` / `page_size` / `calc_total`.
 - **Graceful error mode.** `遇到业务错误时抛出` defaults to on (throws on non-zero `status`). Turn it off to surface the raw API response as JSON for in-flow error handling.
 
@@ -40,35 +41,41 @@ Create a **WangDian API** credential with:
 
 1. Drop a **WangDian API** node into your workflow.
 2. Pick a **资源** (category). The matching **操作** dropdown appears.
-3. Choose the endpoint. The method name shows in the node subtitle.
-4. Set **请求参数** as a JSON object — use camelCase keys, the SDK converts to snake_case automatically.
+3. Choose the endpoint. The method name shows in the node subtitle and a typed **请求参数** form renders below.
+4. Fill the named fields. Required fields are marked with `*` and `[必填]`; descriptions come from the SDK's JSDoc.
 5. For paginated endpoints, toggle **启用分页** and configure page/count.
+
+For endpoints the SDK ships as a generic `WdtRequestBody` (no typed interface), the node falls back to a JSON editor for that operation. The `自定义` resource always uses a JSON editor since the method is user-supplied.
 
 ### Examples
 
 Query the first page of sales trades:
 
-```jsonc
-// 资源: 订单类 → 操作: 订单查询 (sales.TradeQuery.queryWithDetail)
-// 启用分页: on, 页码: 1, 每页数量: 40, 是否计算总数: on
-// 请求参数:
-{
-  "startTime": "2026-06-01 00:00:00",
-  "endTime": "2026-06-19 23:59:59",
-  "statusType": 0
-}
+```
+资源:        订单类
+操作:        订单查询 (sales.TradeQuery.queryWithDetail)
+启用分页:    on
+  页码:       1
+  每页数量:   40
+  是否计算总数: on
+
+请求参数:
+  Start Time *  2026-06-01 00:00:00
+  End Time   *  2026-06-19 23:59:59
+  Warehouse No  (leave blank for all warehouses)
+  Status        55,95
 ```
 
-Push a raw trade:
+Push a raw trade (uses JSON sub-editors for array fields):
 
-```jsonc
-// 资源: 订单类 → 操作: 原始单推送 (sales.RawTrade.pushSelf)
-// 请求参数:
-{
-  "shopNo": "MY-SHOP",
-  "rawTradeList": [{ "tid": "T123", "tradeStatus": 10 }],
-  "rawTradeOrderList": [{ "oid": "O1", "num": 1 }]
-}
+```
+资源:    订单类
+操作:    原始单推送 (sales.RawTrade.pushSelf)
+
+请求参数:
+  Shop No *        MY-SHOP
+  Raw Trade List   [{ "tid": "T123", "tradeStatus": 10 }]
+  Raw Trade Order List  [{ "oid": "O1", "num": 1 }]
 ```
 
 ## Development
@@ -80,7 +87,7 @@ bun run build                # codegen + tsc + copy icons
 bun run lint
 ```
 
-`endpoints.generated.ts` is checked in and refreshed on every build. The generator pulls `WDT_ENDPOINTS` straight from `@waywake/wdt-sdk`, so adding new endpoints to the SDK is picked up automatically.
+`endpoints.generated.ts` is checked in and refreshed on every build. The generator pulls `WDT_ENDPOINTS` straight from `@waywake/wdt-sdk` and walks `endpoint-types.d.ts` with the TypeScript Compiler API to extract every field on each `Request` interface — names, types, optionality, and JSDoc descriptions all flow into the generated `WDT_ENDPOINT_FIELDS` map. Adding new endpoints to the SDK is picked up automatically.
 
 ## How it works
 

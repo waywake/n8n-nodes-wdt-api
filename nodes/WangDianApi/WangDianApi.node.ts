@@ -11,7 +11,13 @@ import {
 import type { NodeConnectionType } from 'n8n-workflow';
 import type { WdtRequestBody } from '@waywake/wdt-sdk';
 
-import { WDT_ENDPOINT_CATEGORIES, WDT_ENDPOINT_OPTIONS } from './endpoints.generated';
+import {
+	WDT_ENDPOINT_CATEGORIES,
+	WDT_ENDPOINT_FIELDS,
+	WDT_ENDPOINT_OPTIONS,
+	type WdtEndpointOption,
+	type WdtFieldDef,
+} from './endpoints.generated';
 
 const CUSTOM_RESOURCE = '__custom__';
 const MAIN_CONNECTION: NodeConnectionType = 'main';
@@ -62,6 +68,105 @@ for (const binding of CATEGORY_BINDINGS) {
 		action: opt.name,
 	}));
 }
+
+const PARAM_FIELD_NAME_PREFIX = 'params_';
+const BODY_FIELD_NAME_PREFIX = 'body_';
+
+function methodToSuffix(method: string): string {
+	return method.replace(/\./g, '_');
+}
+
+function paramsFieldName(method: string): string {
+	return `${PARAM_FIELD_NAME_PREFIX}${methodToSuffix(method)}`;
+}
+
+function bodyFieldName(method: string): string {
+	return `${BODY_FIELD_NAME_PREFIX}${methodToSuffix(method)}`;
+}
+
+function defaultValueForType(type: WdtFieldDef['type']): string | number | boolean {
+	switch (type) {
+		case 'string':
+			return '';
+		case 'number':
+			return 0;
+		case 'boolean':
+			return false;
+		case 'json':
+			return '{}';
+	}
+}
+
+function buildParamField(opt: WdtEndpointOption): INodeProperties {
+	// BINDING_BY_VALUE always contains every category emitted by the SDK codegen.
+	const binding = BINDING_BY_VALUE[opt.category];
+	const operationField = `${binding!.slug}_op`;
+	const meta = WDT_ENDPOINT_FIELDS[opt.value];
+
+	if (!meta || meta.fallbackToJson || meta.fields.length === 0) {
+		return {
+			displayName: '请求参数 (JSON)',
+			name: bodyFieldName(opt.value),
+			type: 'json',
+			typeOptions: {
+				alwaysOpenEditWindow: true,
+			},
+			default: '{}',
+			displayOptions: {
+				show: {
+					[operationField]: [opt.value],
+				},
+			},
+			description: `此接口未内置结构化字段，请直接编辑 JSON 对象。字段名使用 camelCase (SDK 会自动转为 snake_case)。 [${opt.value}]`,
+		};
+	}
+
+	const values: INodeProperties[] = meta.fields.map((field) => {
+		const tsHint =
+			field.type === 'json' && field.tsType !== 'json'
+				? ` (TS 类型: ${field.tsType})`
+				: '';
+		const requiredHint = field.optional ? '' : ' [必填]';
+		const property: INodeProperties = {
+			displayName: field.optional ? field.displayName : `${field.displayName} *`,
+			name: field.name,
+			type: field.type,
+			default: defaultValueForType(field.type),
+			description: `${field.description || field.displayName}${requiredHint}${tsHint}`,
+		};
+		if (field.type === 'json') {
+			property.typeOptions = { alwaysOpenEditWindow: true };
+		}
+		return property;
+	});
+
+	return {
+		displayName: '请求参数',
+		name: paramsFieldName(opt.value),
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: false,
+		},
+		displayOptions: {
+			show: {
+				resource: [opt.category],
+				[operationField]: [opt.value],
+			},
+		},
+		default: {},
+		placeholder: '',
+		description: `${opt.description} [${opt.value}]`,
+		options: [
+			{
+				displayName: '字段',
+				name: 'values',
+				values,
+			},
+		],
+	};
+}
+
+const PARAM_FIELDS: INodeProperties[] = WDT_ENDPOINT_OPTIONS.map(buildParamField);
 
 export class WangDianApi implements INodeType {
 	description: INodeTypeDescription = {
@@ -132,6 +237,7 @@ export class WangDianApi implements INodeType {
 				default: '订单类',
 			},
 			...buildOperationFields(),
+			...PARAM_FIELDS,
 			{
 				displayName: '方法名称',
 				name: 'method',
@@ -148,14 +254,20 @@ export class WangDianApi implements INodeType {
 				placeholder: 'sales.TradeQuery.queryWithDetail',
 			},
 			{
-				displayName: '请求参数',
+				displayName: '请求参数 (JSON)',
 				name: 'body',
 				type: 'json',
 				typeOptions: {
 					alwaysOpenEditWindow: true,
 				},
 				default: '{}',
-				description: '请求体 JSON 对象，字段名使用 camelCase（SDK 会自动转换为 snake_case）。',
+				displayOptions: {
+					show: {
+						resource: [CUSTOM_RESOURCE],
+					},
+				},
+				description:
+					'请求体 JSON 对象，字段名使用 camelCase (SDK 会自动转换为 snake_case)。',
 			},
 			{
 				displayName: '启用分页',
@@ -241,23 +353,9 @@ export class WangDianApi implements INodeType {
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			const resource = this.getNodeParameter('resource', itemIndex) as string;
 			const method = resolveMethod(this, resource, itemIndex);
-			const bodyRaw = this.getNodeParameter('body', itemIndex, '{}') as string | object;
+			const request = resolveRequestBody(this, resource, method, itemIndex);
 			const throwOnApiError = this.getNodeParameter('throwOnApiError', itemIndex, true) as boolean;
 			const pagerEnabled = this.getNodeParameter('pagerEnabled', itemIndex, false) as boolean;
-
-			let request: unknown;
-			try {
-				request =
-					typeof bodyRaw === 'string' && bodyRaw.trim()
-						? JSON.parse(bodyRaw)
-						: bodyRaw || undefined;
-			} catch (error) {
-				throw new NodeOperationError(
-					this.getNode(),
-					`请求参数不是合法 JSON：${(error as Error).message}`,
-					{ itemIndex },
-				);
-			}
 
 			const options: {
 				throwOnApiError: boolean;
@@ -353,4 +451,52 @@ function resolveMethod(ctx: IExecuteFunctions, resource: string, itemIndex: numb
 		throw new NodeOperationError(ctx.getNode(), '请选择一个接口操作。', { itemIndex });
 	}
 	return method;
+}
+
+function resolveRequestBody(
+	ctx: IExecuteFunctions,
+	resource: string,
+	method: string,
+	itemIndex: number,
+): unknown {
+	// Custom method → free-form JSON body
+	if (resource === CUSTOM_RESOURCE) {
+		return parseJsonBody(ctx, 'body', itemIndex);
+	}
+
+	const meta = WDT_ENDPOINT_FIELDS[method];
+	if (!meta || meta.fallbackToJson || meta.fields.length === 0) {
+		// Unstructured endpoint → per-method JSON body field
+		return parseJsonBody(ctx, bodyFieldName(method), itemIndex);
+	}
+
+	// Structured endpoint → fixedCollection of typed fields
+	const raw = ctx.getNodeParameter(paramsFieldName(method), itemIndex, {}) as
+		| { values?: IDataObject }
+		| IDataObject;
+	const values = (raw && typeof raw === 'object' && 'values' in raw ? raw.values : {}) as IDataObject;
+
+	// Strip empty-string defaults so we don't send noise to the API.
+	const cleaned: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(values)) {
+		if (value === '' || value === null || value === undefined) continue;
+		cleaned[key] = value;
+	}
+	return cleaned;
+}
+
+function parseJsonBody(ctx: IExecuteFunctions, fieldName: string, itemIndex: number): unknown {
+	const raw = ctx.getNodeParameter(fieldName, itemIndex, '{}') as string | object;
+	if (typeof raw !== 'string') {
+		return raw || undefined;
+	}
+	const trimmed = raw.trim();
+	if (!trimmed) return undefined;
+	try {
+		return JSON.parse(trimmed);
+	} catch (error) {
+		throw new NodeOperationError(ctx.getNode(), `请求参数不是合法 JSON：${(error as Error).message}`, {
+			itemIndex,
+		});
+	}
 }
