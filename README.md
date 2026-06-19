@@ -1,48 +1,94 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-wdt-api
 
-# n8n-nodes-starter
+n8n community nodes for the [旺店通旗舰版 OpenAPI](https://open.wangdian.cn/qjb/open/apidoc). All 184 endpoints exposed by [`@waywake/wdt-sdk`](https://www.npmjs.com/package/@waywake/wdt-sdk) are mapped to a single n8n node with a categorized `资源 → 操作` picker, so you can call any WangDian API without leaving the canvas.
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+## Highlights
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+- **Full API coverage.** 184 endpoints across 6 categories (订单 / 售后 / 货品 / 基础 / 库存 / 采购) are auto-generated from the SDK's `WDT_ENDPOINTS` metadata. Run `bun run generate:endpoints` to refresh when the SDK ships new endpoints.
+- **Typed signing + transport.** Delegates to `@waywake/wdt-sdk`'s `WdtClient` — request body camelCase→snake_case conversion, MD5 signing, pager params, and error handling all match the official spec.
+- **Resource → Operation UX.** Pick a category and the matching operation dropdown appears. Each option surfaces the official doc description plus the SDK method identifier.
+- **Custom method escape hatch.** Need an endpoint the SDK doesn't know yet? Switch resource to `自定义` and type the method name directly.
+- **Optional pager.** Toggle on for query endpoints to send `page_no` / `page_size` / `calc_total`.
+- **Graceful error mode.** `遇到业务错误时抛出` defaults to on (throws on non-zero `status`). Turn it off to surface the raw API response as JSON for in-flow error handling.
 
-If you would like your node to be available on n8n cloud you can also [submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/).
+## Installation
 
-## Prerequisites
+In n8n, go to **Settings → Community nodes → Install**, then enter:
 
-You need the following installed on your development machine:
+```
+@waywake/n8n-nodes-wdt-api
+```
 
-* [git](https://git-scm.com/downloads)
-* Node.js and npm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  npm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+Or install manually inside your n8n data directory:
 
-## Using this starter
+```bash
+npm install @waywake/n8n-nodes-wdt-api
+```
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+## Configuration
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm run lint` to check for errors or `npm run lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+Create a **WangDian API** credential with:
 
-## More information
+| Field | Description |
+| --- | --- |
+| 卖家账号 (`sid`) | WangDian seller account ID |
+| 接口 Key (`appKey`) | API key from WangDian open platform |
+| 接口 Secret (`appSecret`) | API secret in the form `<secret>:<salt>` |
+| 接口地址 (`serverUrl`) | Defaults to `https://wdt.wangdian.cn/openapi` |
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+## Usage
+
+1. Drop a **WangDian API** node into your workflow.
+2. Pick a **资源** (category). The matching **操作** dropdown appears.
+3. Choose the endpoint. The method name shows in the node subtitle.
+4. Set **请求参数** as a JSON object — use camelCase keys, the SDK converts to snake_case automatically.
+5. For paginated endpoints, toggle **启用分页** and configure page/count.
+
+### Examples
+
+Query the first page of sales trades:
+
+```jsonc
+// 资源: 订单类 → 操作: 订单查询 (sales.TradeQuery.queryWithDetail)
+// 启用分页: on, 页码: 1, 每页数量: 40, 是否计算总数: on
+// 请求参数:
+{
+  "startTime": "2026-06-01 00:00:00",
+  "endTime": "2026-06-19 23:59:59",
+  "statusType": 0
+}
+```
+
+Push a raw trade:
+
+```jsonc
+// 资源: 订单类 → 操作: 原始单推送 (sales.RawTrade.pushSelf)
+// 请求参数:
+{
+  "shopNo": "MY-SHOP",
+  "rawTradeList": [{ "tid": "T123", "tradeStatus": 10 }],
+  "rawTradeOrderList": [{ "oid": "O1", "num": 1 }]
+}
+```
+
+## Development
+
+```bash
+bun install
+bun run generate:endpoints   # regenerate endpoints.generated.ts from the SDK
+bun run build                # codegen + tsc + copy icons
+bun run lint
+```
+
+`endpoints.generated.ts` is checked in and refreshed on every build. The generator pulls `WDT_ENDPOINTS` straight from `@waywake/wdt-sdk`, so adding new endpoints to the SDK is picked up automatically.
+
+## How it works
+
+The SDK ships as ESM-only; n8n community nodes are CommonJS. The node therefore:
+
+1. **Static metadata** — `endpoints.generated.ts` (codegen output) holds the 184 endpoint option arrays used to build the node description, so n8n can render the dropdowns at load time without any async work.
+2. **Runtime calls** — `execute()` uses a `Function()`-wrapped `import('@waywake/wdt-sdk')` to dynamically load the SDK at call time. This bypasses TypeScript's commonjs `import()` lowering, which would otherwise emit `require()` and fail on the ESM-only package.
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+MIT
