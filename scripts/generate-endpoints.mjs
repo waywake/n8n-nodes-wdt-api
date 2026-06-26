@@ -70,6 +70,8 @@ export interface WdtEndpointParams {
 	fallbackToJson: boolean;
 	/** Parsed field definitions, in declaration order. Empty when fallbackToJson is true or the interface has no own members. */
 	fields: WdtFieldDef[];
+	/** Best-effort default array field to aggregate for auto-pagination. Empty when no response array field is declared. */
+	defaultAggregateListField: string;
 }
 
 export const WDT_ENDPOINT_CATEGORIES: WdtEndpointCategory[] = [
@@ -99,7 +101,12 @@ const endpointLines = endpoints
 
 // --- Parse endpoint-types.d.ts for request field metadata ---
 const sourceText = readFileSync(endpointTypesPath, 'utf8');
-const sourceFile = ts.createSourceFile('endpoint-types.d.ts', sourceText, ts.ScriptTarget.Latest, true);
+const sourceFile = ts.createSourceFile(
+	'endpoint-types.d.ts',
+	sourceText,
+	ts.ScriptTarget.Latest,
+	true,
+);
 
 function typeKind(tsType) {
 	switch (tsType) {
@@ -129,9 +136,18 @@ function splitCamel(name) {
 }
 
 const fieldMap = new Map();
+const dataListFieldMap = new Map();
 for (const stmt of sourceFile.statements) {
-	if (!ts.isInterfaceDeclaration(stmt) || !stmt.name.text.endsWith('Request')) continue;
+	if (!ts.isInterfaceDeclaration(stmt)) continue;
 	const interfaceName = stmt.name.text;
+	if (interfaceName.endsWith('Data')) {
+		const arrayField = findFirstArrayField(stmt);
+		if (arrayField) {
+			dataListFieldMap.set(interfaceName, arrayField);
+		}
+		continue;
+	}
+	if (!interfaceName.endsWith('Request')) continue;
 	const fields = [];
 	for (const member of stmt.members) {
 		if (!ts.isPropertySignature(member) || !member.name || !ts.isIdentifier(member.name)) continue;
@@ -149,6 +165,29 @@ for (const stmt of sourceFile.statements) {
 	fieldMap.set(interfaceName, fields);
 }
 
+function findFirstArrayField(interfaceNode) {
+	for (const member of interfaceNode.members) {
+		if (
+			!ts.isPropertySignature(member) ||
+			!member.name ||
+			!ts.isIdentifier(member.name) ||
+			!member.type
+		) {
+			continue;
+		}
+		if (isArrayType(member.type)) {
+			return member.name.text;
+		}
+	}
+	return '';
+}
+
+function isArrayType(typeNode) {
+	if (ts.isArrayTypeNode(typeNode)) return true;
+	if (!ts.isTypeReferenceNode(typeNode) || !ts.isIdentifier(typeNode.typeName)) return false;
+	return typeNode.typeName.text === 'Array';
+}
+
 function pascalOfMethod(method) {
 	return method
 		.split('.')
@@ -159,9 +198,11 @@ function pascalOfMethod(method) {
 const paramsLines = endpoints
 	.map((endpoint) => {
 		const interfaceName = `Wdt${pascalOfMethod(endpoint.method)}Request`;
+		const dataInterfaceName = `Wdt${pascalOfMethod(endpoint.method)}Data`;
+		const defaultAggregateListField = dataListFieldMap.get(dataInterfaceName) ?? '';
 		const fields = fieldMap.get(interfaceName);
 		if (!fields) {
-			return `\t${JSON.stringify(endpoint.method)}: { fallbackToJson: true, fields: [] },`;
+			return `\t${JSON.stringify(endpoint.method)}: { fallbackToJson: true, fields: [], defaultAggregateListField: ${JSON.stringify(defaultAggregateListField)} },`;
 		}
 		const fieldSerialised = fields
 			.map((f) => {
@@ -177,6 +218,7 @@ const paramsLines = endpoints
 			.join('\n');
 		return `\t${JSON.stringify(endpoint.method)}: {
 \t\tfallbackToJson: false,
+\t\tdefaultAggregateListField: ${JSON.stringify(defaultAggregateListField)},
 \t\tfields: [
 ${fieldSerialised}
 \t\t],
@@ -184,8 +226,13 @@ ${fieldSerialised}
 	})
 	.join('\n');
 
-const fallbackCount = endpoints.filter((e) => !fieldMap.has(`Wdt${pascalOfMethod(e.method)}Request`)).length;
-const totalFields = endpoints.reduce((sum, e) => sum + (fieldMap.get(`Wdt${pascalOfMethod(e.method)}Request`)?.length ?? 0), 0);
+const fallbackCount = endpoints.filter(
+	(e) => !fieldMap.has(`Wdt${pascalOfMethod(e.method)}Request`),
+).length;
+const totalFields = endpoints.reduce(
+	(sum, e) => sum + (fieldMap.get(`Wdt${pascalOfMethod(e.method)}Request`)?.length ?? 0),
+	0,
+);
 
 const rawBody = `${header}${categoryLines}
 ];

@@ -9,7 +9,7 @@ n8n community nodes for the [旺店通旗舰版 OpenAPI](https://open.wangdian.c
 - **Resource → Operation UX.** Pick a category and the matching operation dropdown appears. Each option surfaces the official doc description plus the SDK method identifier.
 - **Structured request fields.** Every endpoint with a typed `Request` interface (182 of 184) gets a `请求参数` form auto-generated from the SDK's `endpoint-types.d.ts` — 875 named fields in total, each carrying its JSDoc description, required flag, and coarse type (string / number / boolean / JSON). Required fields are marked with `*` and `[必填]` in the description.
 - **Custom method escape hatch.** Need an endpoint the SDK doesn't know yet? Switch resource to `自定义` and type the method name + raw JSON body directly.
-- **Optional pager.** Toggle on for query endpoints to send `page_no` / `page_size` / `calc_total`.
+- **Optional pager.** Toggle on for query endpoints to send `page_no` / `page_size` / `calc_total`, with single-page or auto-pagination modes.
 - **Graceful error mode.** `遇到业务错误时抛出` defaults to on (throws on non-zero `status`). Turn it off to surface the raw API response as JSON for in-flow error handling.
 
 ## Installation
@@ -30,12 +30,12 @@ npm install @waywake/n8n-nodes-wdt-api
 
 Create a **WangDian API** credential with:
 
-| Field | Description |
-| --- | --- |
-| 卖家账号 (`sid`) | WangDian seller account ID |
-| 接口 Key (`appKey`) | API key from WangDian open platform |
-| 接口 Secret (`appSecret`) | API secret in the form `<secret>:<salt>` |
-| 接口地址 (`serverUrl`) | Defaults to `https://wdt.wangdian.cn/openapi` |
+| Field                     | Description                                   |
+| ------------------------- | --------------------------------------------- |
+| 卖家账号 (`sid`)          | WangDian seller account ID                    |
+| 接口 Key (`appKey`)       | API key from WangDian open platform           |
+| 接口 Secret (`appSecret`) | API secret in the form `<secret>:<salt>`      |
+| 接口地址 (`serverUrl`)    | Defaults to `https://wdt.wangdian.cn/openapi` |
 
 ## Usage
 
@@ -43,7 +43,7 @@ Create a **WangDian API** credential with:
 2. Pick a **资源** (category). The matching **操作** dropdown appears.
 3. Choose the endpoint. The method name shows in the node subtitle and a typed **请求参数** form renders below.
 4. Fill the named fields. Required fields are marked with `*` and `[必填]`; descriptions come from the SDK's JSDoc.
-5. For paginated endpoints, toggle **启用分页** and configure page/count.
+5. For paginated endpoints, toggle **启用分页** and configure page/count. Use **分页模式 → 所有页** to automatically request subsequent pages.
 
 For endpoints the SDK ships as a generic `WdtRequestBody` (no typed interface), the node falls back to a JSON editor for that operation. The `自定义` resource always uses a JSON editor since the method is user-supplied.
 
@@ -55,6 +55,7 @@ Query the first page of sales trades:
 资源:        订单类
 操作:        订单查询 (sales.TradeQuery.queryWithDetail)
 启用分页:    on
+分页模式:    单页
   页码:       1
   每页数量:   40
   是否计算总数: on
@@ -65,6 +66,19 @@ Query the first page of sales trades:
   Warehouse No  (leave blank for all warehouses)
   Status        55,95
 ```
+
+Query all pages from a paginated endpoint:
+
+```
+启用分页:    on
+分页模式:    所有页
+页码:        0
+每页数量:    100
+最大页数:    100
+聚合列表字段: order
+```
+
+Automatic pagination stops when the returned page has fewer records than `每页数量`, when `totalCount` has been reached, or when `最大页数` is hit. If `聚合列表字段` is set, the node extracts that array field from every page and emits the merged list as n8n items. For built-in typed endpoints, this field defaults to the first array field declared on the endpoint response `Data` interface, such as `order` or `details`. Leave it blank to output each page's full `data` object.
 
 Push a raw trade (uses JSON sub-editors for array fields):
 

@@ -47,6 +47,8 @@ export interface WdtEndpointParams {
 	fallbackToJson: boolean;
 	/** Parsed field definitions, in declaration order. Empty when fallbackToJson is true or the interface has no own members. */
 	fields: WdtFieldDef[];
+	/** Best-effort default array field to aggregate for auto-pagination. Empty when no response array field is declared. */
+	defaultAggregateListField: string;
 }
 
 export const WDT_ENDPOINT_CATEGORIES: WdtEndpointCategory[] = [
@@ -1768,6 +1770,7 @@ export const WDT_ENDPOINT_OPTIONS: WdtEndpointOption[] = [
 export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	'purchase.PurchaseOrder.updatePurchaseInfo': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'purchaseNo',
@@ -1789,6 +1792,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'purchaseNo',
@@ -1867,6 +1871,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.cancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'purchaseNo',
@@ -1880,6 +1885,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.cancelByType': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'operateType',
@@ -1910,6 +1916,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.pending': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
 				name: 'purchaseNos',
@@ -1923,6 +1930,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'purchaseNo',
@@ -2122,6 +2130,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.Purchase.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'warehouseNo',
@@ -2207,6 +2216,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Purchase.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -2261,6 +2271,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Purchase.cancel': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinNo',
@@ -2274,6 +2285,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Purchase.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinOrder',
@@ -2295,6 +2307,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseApply.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -2324,6 +2337,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseApply.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'detailList',
@@ -2378,6 +2392,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseApply.cancelForApi': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'applyList',
@@ -2391,6 +2406,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseApply.stopForApi': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'applyList',
@@ -2404,6 +2420,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.PurchaseReturn.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -2466,6 +2483,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.PurchaseReturn.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
@@ -2487,6 +2505,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseReturn.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'providerNo',
@@ -2540,6 +2559,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseReturn.cancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'returnNo',
@@ -2553,6 +2573,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseReturn.pending': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
 				name: 'purchaseReturnNos',
@@ -2566,6 +2587,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseReturn.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
@@ -2595,6 +2617,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseReturn.batchCancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
 				name: 'returnNos',
@@ -2608,6 +2631,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.Purchase.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'settleOrder',
@@ -2629,6 +2653,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.PurchaseReturn.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'settleOrder',
@@ -2650,6 +2675,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.ProviderGoods.queryDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'details',
 		fields: [
 			{
 				name: 'providerNo',
@@ -2703,6 +2729,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.ProviderGoods.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorList',
 		fields: [
 			{
 				name: 'purchaseProviderGoodsList',
@@ -2716,6 +2743,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.StockInPreOrder.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -2745,6 +2773,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.getTradeMergedLog': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'logList',
 		fields: [
 			{
 				name: 'startTime',
@@ -2766,6 +2795,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.LogisticsSync.getSyncListExt': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'shopNo',
@@ -2820,6 +2850,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.CustomAttr.getTradeLabel': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -2841,6 +2872,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -2993,6 +3025,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.querySelfOrderWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -3137,6 +3170,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeEdit.modifyRemark': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'data',
@@ -3150,6 +3184,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.getLog': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'tradeNo',
@@ -3163,6 +3198,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.getLog2': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'result',
 		fields: [
 			{
 				name: 'tradeNo',
@@ -3176,6 +3212,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeEdit.toException': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'tradeNo',
@@ -3189,6 +3226,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.invoice.InvoiceOrder.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -3241,9 +3279,14 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 			},
 		],
 	},
-	'finance.invoice.InvoiceOrder.updateInvoice': { fallbackToJson: true, fields: [] },
+	'finance.invoice.InvoiceOrder.updateInvoice': {
+		fallbackToJson: true,
+		fields: [],
+		defaultAggregateListField: '',
+	},
 	'sales.StockSync.getSelfWaitSyncIdListOpen': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'idList',
 		fields: [
 			{
 				name: 'count',
@@ -3265,6 +3308,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.syncSuccess': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'apiGoodsId',
@@ -3286,6 +3330,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.calcStock': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'apiGoodsId',
@@ -3308,6 +3353,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.batchCalcStock': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'successDate',
 		fields: [
 			{
 				name: 'apiGoodsId',
@@ -3330,6 +3376,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.syncFail': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'apiGoodsId',
@@ -3351,6 +3398,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.queryHistoryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'timeType',
@@ -3453,6 +3501,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.queryHistorySelfOrderWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'timeType',
@@ -3547,6 +3596,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.queryHistoryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -3610,6 +3660,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.searchHistory': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'tid',
@@ -3663,6 +3714,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.searchHistorySelfOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'tid',
@@ -3716,6 +3768,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.AlipayAccountCheck.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -3761,6 +3814,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.RawPayment.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'shopNo',
@@ -3814,6 +3868,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.RawPayment.push': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'detailList',
@@ -3827,6 +3882,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.cancelSync': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'apiGoodsId',
@@ -3848,6 +3904,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.Payment.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -3893,6 +3950,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.searchLogistics': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -3963,6 +4021,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.LogisticsSync.update': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'syncList',
@@ -3976,6 +4035,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -4128,6 +4188,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.searchPositionDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -4173,6 +4234,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.Payment.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'paymentList',
 		fields: [
 			{
 				name: 'startTime',
@@ -4242,6 +4304,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.searchCancel': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -4263,6 +4326,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeImport.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'tradeList',
@@ -4276,6 +4340,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'tid',
@@ -4337,6 +4402,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.searchSelfOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'tid',
@@ -4390,6 +4456,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.pushSelf': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'shopNo',
@@ -4427,6 +4494,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.pushSelf2': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorList',
 		fields: [
 			{
 				name: 'shopNo',
@@ -4464,6 +4532,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.weighingExt': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'logisticsOrTradeNo',
@@ -4509,6 +4578,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.onceWeighing': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'logisticsOrTradeNo',
@@ -4562,6 +4632,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.onceWeighingByNo': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'logisticsOrTradeNo',
@@ -4615,6 +4686,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.salesWeighing': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderNo',
@@ -4700,6 +4772,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.jit.JitRefund.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -4729,6 +4802,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Goods.queryWithSpec': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'goodsList',
 		fields: [
 			{
 				name: 'specNo',
@@ -4798,6 +4872,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.GoodsClass.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'className',
@@ -4827,6 +4902,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Goods.batchPush': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'goodsInfo',
@@ -4840,6 +4916,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.GoodsBrand.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'brandNo',
@@ -4877,6 +4954,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Goods.push': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'goodsInfo',
@@ -4898,6 +4976,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Goods.push2': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'specInfoList',
 		fields: [
 			{
 				name: 'goodsInfo',
@@ -4919,6 +4998,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.GoodsBrand.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -4956,6 +5036,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.ApiGoods.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'goodsList',
 		fields: [
 			{
 				name: 'shopNo',
@@ -5001,6 +5082,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.ApiGoods.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'recIds',
 		fields: [
 			{
 				name: 'param',
@@ -5014,6 +5096,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Category.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'categoryList',
 		fields: [
 			{
 				name: 'shopNo',
@@ -5043,6 +5126,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'process.Process.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -5097,6 +5181,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'process.Process.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'specNo',
@@ -5150,6 +5235,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.process.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'processNo',
@@ -5195,6 +5281,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Barcode.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorList',
 		fields: [
 			{
 				name: 'barcodeInfoList',
@@ -5208,6 +5295,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'process.Bom.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'startTime',
@@ -5245,6 +5333,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'process.Bom.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'specNo',
@@ -5282,6 +5371,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.GoodsClass.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'parentClassName',
@@ -5311,6 +5401,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Suite.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'suiteList',
 		fields: [
 			{
 				name: 'specNo',
@@ -5396,6 +5487,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Suite.upload2': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'status',
@@ -5425,6 +5517,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Warehouse.queryWarehouse': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'details',
 		fields: [
 			{
 				name: 'warehouseNo',
@@ -5488,6 +5581,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Address.districtSearch': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'cityId',
@@ -5517,6 +5611,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Address.provinceSearch': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -5538,6 +5633,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Address.citySearch': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'provinceId',
@@ -5567,6 +5663,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Shop.queryShop': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'details',
 		fields: [
 			{
 				name: 'shopNo',
@@ -5588,6 +5685,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Shop.updateShop': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'shopNo',
@@ -5689,6 +5787,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.PurchaseProvider.queryDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'details',
 		fields: [
 			{
 				name: 'providerNo',
@@ -5790,6 +5889,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.PurchaseProvider.push': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'provider',
@@ -5803,6 +5903,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.OperationReason.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -5824,6 +5925,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Logistics.queryLogistics': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'details',
 		fields: [
 			{
 				name: 'logisticsNo',
@@ -5861,6 +5963,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.warehouseSearch': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -5898,6 +6001,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.query': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'virtualWarehouseNo',
@@ -5919,6 +6023,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeEdit.uploadChangeGoodsByApi': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'specNoIn',
@@ -5964,6 +6069,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Employee.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -5993,6 +6099,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockShelve.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -6046,6 +6153,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Base.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -6109,6 +6217,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'statistic.StockoutCollect.queryCostWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -6146,6 +6255,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Base.searchSN': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -6175,6 +6285,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Base.uploadSN': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockoutNo',
@@ -6196,6 +6307,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.stockSyncByPd': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'pdOrder',
@@ -6217,6 +6329,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.StockCost.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -6254,6 +6367,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.Logistics.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -6283,6 +6397,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Transfer.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -6345,6 +6460,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Transfer.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
@@ -6374,6 +6490,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stocktransfer.Manage.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -6436,6 +6553,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Transfer.cancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'transferOutNo',
@@ -6449,6 +6567,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stocktransfer.Manage.cancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'transferNo',
@@ -6462,6 +6581,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Transfer.cancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'transferInNo',
@@ -6475,6 +6595,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stocktransfer.Manage.pending': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
 				name: 'transferNos',
@@ -6496,6 +6617,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stocktransfer.Edit.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
@@ -6525,6 +6647,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.Transfer.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'fromWarehouseNo',
@@ -6595,6 +6718,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Transfer.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -6649,6 +6773,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Transfer.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
@@ -6678,6 +6803,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.SalesPick.pickListOverviewForApi': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'pickGoodsDataList',
 		fields: [
 			{
 				name: 'pickNo',
@@ -6691,6 +6817,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.ErrorCorrection.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'result',
 		fields: [
 			{
 				name: 'startTime',
@@ -6744,6 +6871,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.queryAvailableStock': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'stocks',
 		fields: [
 			{
 				name: 'startTime',
@@ -6789,6 +6917,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.queryChangeHistory': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'startDate',
@@ -6842,6 +6971,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'startTime',
@@ -6905,6 +7035,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.search2': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -6968,6 +7099,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.stockDetailSearch': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'stockSpecId',
@@ -6991,6 +7123,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.PositionCapacity.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -7036,6 +7169,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.queryStockPdOutDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -7097,6 +7231,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.queryStockPd': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'pdList',
 		fields: [
 			{
 				name: 'startTime',
@@ -7167,6 +7302,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.queryStockPdDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'pdDetailList',
 		fields: [
 			{
 				name: 'pdNo',
@@ -7180,6 +7316,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.queryStockPdInDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -7242,6 +7379,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.GoodsBatch.createByApi': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'batchNo',
@@ -7263,6 +7401,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.OtherQuery.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'timeType',
@@ -7333,6 +7472,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Other.cancelOtherOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderNo',
@@ -7354,6 +7494,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Other.createOther': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockoutOrder',
@@ -7367,6 +7508,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.OutQuery.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'timeType',
@@ -7429,6 +7571,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.Out.push': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'order',
@@ -7450,6 +7593,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.Out.cancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'successData',
 		fields: [
 			{
 				name: 'orderNoList',
@@ -7463,6 +7607,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Other.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -7533,6 +7678,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Other.cancelOtherOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderNo',
@@ -7554,6 +7700,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Other.createOtherOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinOrder',
@@ -7567,6 +7714,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.InQuery.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'timeType',
@@ -7629,6 +7777,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.In.push': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'order',
@@ -7650,6 +7799,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.In.cancelOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'successData',
 		fields: [
 			{
 				name: 'orderNoList',
@@ -7663,6 +7813,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.OtherIn.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
@@ -7684,6 +7835,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Base.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -7746,6 +7898,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'statistic.StockinCollect.queryCostWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -7791,6 +7944,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Base.searchSN': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -7820,6 +7974,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Base.uploadSN': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinNo',
@@ -7841,6 +7996,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Process.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -7903,6 +8059,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Process.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -7965,6 +8122,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterOut.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'outerOutNo',
@@ -8035,6 +8193,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterOut.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'order',
@@ -8064,6 +8223,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterIn.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'outerInNo',
@@ -8134,6 +8294,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterIn.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'sn',
@@ -8155,6 +8316,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterTransfer.createByApi': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'createMode',
@@ -8209,6 +8371,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.GoodsPack.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'warehouseNo',
@@ -8270,6 +8433,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.orderSearch': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -8315,6 +8479,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.create': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderMap',
@@ -8336,6 +8501,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.stockSearch': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'startTime',
@@ -8381,6 +8547,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.strategyAllocationQuery': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'virtualWarehouseNo',
@@ -8427,6 +8594,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.strategyAllocationCreate': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'range',
@@ -8496,6 +8664,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.reserveExtractAdd': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
@@ -8517,6 +8686,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.MoveOrder.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -8579,6 +8749,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockdefect.DefectChange.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -8624,6 +8795,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Pack.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -8679,6 +8851,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.JitOrder.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -8700,6 +8873,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.JitRefund.searchOrderWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'orderList',
 		fields: [
 			{
 				name: 'startTime',
@@ -8721,6 +8895,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.GoodsSN.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'snList',
 		fields: [
 			{
 				name: 'startTime',
@@ -8815,6 +8990,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.PreStockin.createExt': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinOrder',
@@ -8836,6 +9012,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.SmartRefund.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'refundInfo',
@@ -8865,6 +9042,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.Refund.searchHistory': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -8918,6 +9096,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Refund.queryHisWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'warehouseNo',
@@ -9003,6 +9182,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.RawRefund.searchHistory': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -9088,6 +9268,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.Refund.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'shopNos',
@@ -9295,6 +9476,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Refund.queryWithDetail': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'warehouseNo',
@@ -9412,6 +9594,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Refund.createOrder': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinOrder',
@@ -9425,6 +9608,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Refund.returnLogisticsPackageQuery': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'record',
 		fields: [
 			{
 				name: 'startTime',
@@ -9460,9 +9644,14 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 			},
 		],
 	},
-	'wms.stockin.PreStockin.cancel': { fallbackToJson: true, fields: [] },
+	'wms.stockin.PreStockin.cancel': {
+		fallbackToJson: true,
+		fields: [],
+		defaultAggregateListField: '',
+	},
 	'wms.stockin.PreStockin.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'warehouseNo',
@@ -9604,6 +9793,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.RawRefund.search': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'order',
 		fields: [
 			{
 				name: 'startTime',
@@ -9698,6 +9888,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.RawRefund.upload': {
 		fallbackToJson: false,
+		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'shopNo',
@@ -9719,6 +9910,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.RawRefund.upload2': {
 		fallbackToJson: false,
+		defaultAggregateListField: 'errorList',
 		fields: [
 			{
 				name: 'shopNo',

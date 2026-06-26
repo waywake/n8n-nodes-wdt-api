@@ -71,6 +71,9 @@ for (const binding of CATEGORY_BINDINGS) {
 
 const PARAM_FIELD_NAME_PREFIX = 'params_';
 const BODY_FIELD_NAME_PREFIX = 'body_';
+const AGGREGATE_LIST_FIELD_NAME_PREFIX = 'aggregateListField_';
+const PAGINATION_MODE_SINGLE = 'singlePage';
+const PAGINATION_MODE_ALL = 'allPages';
 
 function methodToSuffix(method: string): string {
 	return method.replace(/\./g, '_');
@@ -82,6 +85,10 @@ function paramsFieldName(method: string): string {
 
 function bodyFieldName(method: string): string {
 	return `${BODY_FIELD_NAME_PREFIX}${methodToSuffix(method)}`;
+}
+
+function aggregateListFieldName(method: string): string {
+	return `${AGGREGATE_LIST_FIELD_NAME_PREFIX}${methodToSuffix(method)}`;
 }
 
 function defaultValueForType(type: WdtFieldDef['type']): string | number | boolean {
@@ -164,7 +171,33 @@ function buildParamField(opt: WdtEndpointOption): INodeProperties {
 	};
 }
 
+function buildAggregateListField(opt: WdtEndpointOption): INodeProperties {
+	// BINDING_BY_VALUE always contains every category emitted by the SDK codegen.
+	const binding = BINDING_BY_VALUE[opt.category];
+	const operationField = `${binding!.slug}_op`;
+	const defaultAggregateListField = WDT_ENDPOINT_FIELDS[opt.value]?.defaultAggregateListField ?? '';
+
+	return {
+		displayName: '聚合列表字段',
+		name: aggregateListFieldName(opt.value),
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: [opt.category],
+				[operationField]: [opt.value],
+				pagerEnabled: [true],
+				paginationMode: [PAGINATION_MODE_ALL],
+			},
+		},
+		default: defaultAggregateListField,
+		placeholder: defaultAggregateListField || 'order',
+		description:
+			'自动分页时要从每页响应中抽取并合并的数组字段，支持点路径，例如 order、details 或 result.detailList。留空则按页输出完整 data 对象。',
+	};
+}
+
 const PARAM_FIELDS: INodeProperties[] = WDT_ENDPOINT_OPTIONS.map(buildParamField);
+const AGGREGATE_LIST_FIELDS: INodeProperties[] = WDT_ENDPOINT_OPTIONS.map(buildAggregateListField);
 
 export class WangDianApi implements INodeType {
 	description: INodeTypeDescription = {
@@ -287,7 +320,31 @@ export class WangDianApi implements INodeType {
 					},
 				},
 				default: 0,
-				description: '页码，从 0 开始。',
+				description: '起始页码，从 0 开始。',
+			},
+			{
+				displayName: '分页模式',
+				name: 'paginationMode',
+				type: 'options',
+				displayOptions: {
+					show: {
+						pagerEnabled: [true],
+					},
+				},
+				options: [
+					{
+						name: '单页',
+						value: PAGINATION_MODE_SINGLE,
+						description: '只请求指定页码的一页数据。',
+					},
+					{
+						name: '所有页',
+						value: PAGINATION_MODE_ALL,
+						description: '从起始页码开始自动请求后续页面，直到没有更多数据或达到最大页数。',
+					},
+				],
+				default: PAGINATION_MODE_SINGLE,
+				description: '选择只查询一页，或自动遍历所有分页结果。',
 			},
 			{
 				displayName: '每页数量',
@@ -315,6 +372,39 @@ export class WangDianApi implements INodeType {
 				},
 				default: false,
 				description: 'Whether to return the total record count for the query',
+			},
+			{
+				displayName: '最大页数',
+				name: 'maxPages',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+				},
+				displayOptions: {
+					show: {
+						pagerEnabled: [true],
+						paginationMode: [PAGINATION_MODE_ALL],
+					},
+				},
+				default: 100,
+				description: '自动分页时最多请求多少页，用于避免异常接口导致无限循环。',
+			},
+			...AGGREGATE_LIST_FIELDS,
+			{
+				displayName: '聚合列表字段',
+				name: 'aggregateListField',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: [CUSTOM_RESOURCE],
+						pagerEnabled: [true],
+						paginationMode: [PAGINATION_MODE_ALL],
+					},
+				},
+				default: '',
+				placeholder: 'order',
+				description:
+					'自动分页时要从每页响应中抽取并合并的数组字段，支持点路径，例如 order、details 或 result.detailList。留空则按页输出完整 data 对象。',
 			},
 			{
 				displayName: '遇到业务错误时抛出',
@@ -353,6 +443,9 @@ export class WangDianApi implements INodeType {
 			const request = resolveRequestBody(this, resource, method, itemIndex);
 			const throwOnApiError = this.getNodeParameter('throwOnApiError', itemIndex, true) as boolean;
 			const pagerEnabled = this.getNodeParameter('pagerEnabled', itemIndex, false) as boolean;
+			const paginationMode = pagerEnabled
+				? (this.getNodeParameter('paginationMode', itemIndex, PAGINATION_MODE_SINGLE) as string)
+				: PAGINATION_MODE_SINGLE;
 
 			const options: {
 				throwOnApiError: boolean;
@@ -370,39 +463,64 @@ export class WangDianApi implements INodeType {
 
 			const client = createWdtClient({ sid, appKey, appSecret, baseUrl });
 
-			let response;
-			try {
-				response = await client.call(method, request as WdtRequestBody, options);
-			} catch (error) {
-				if (
-					error instanceof WdtApiError ||
-					error instanceof WdtHttpError ||
-					error instanceof WdtResponseParseError
-				) {
-					throw new NodeOperationError(this.getNode(), error.message, {
-						itemIndex,
-						description:
-							error instanceof WdtApiError
-								? `旺店通返回业务错误（status=${error.status}）。`
-								: '与旺店通 OpenAPI 通信失败。',
-					});
-				}
-				throw error;
+			if (!pagerEnabled || paginationMode === PAGINATION_MODE_SINGLE) {
+				const response = await callWdtApi(client, method, request, options, this, itemIndex, {
+					WdtApiError,
+					WdtHttpError,
+					WdtResponseParseError,
+				});
+				pushPayload(returnData, payloadFromResponse(response, throwOnApiError));
+				continue;
 			}
 
-			const payload =
-				throwOnApiError && response && typeof response === 'object' && 'data' in response
-					? (response as { data?: unknown }).data
-					: response;
+			const pageSize = options.pager?.pageSize ?? 40;
+			const startPageNo = options.pager?.pageNo ?? 0;
+			const maxPages = this.getNodeParameter('maxPages', itemIndex, 100) as number;
+			const aggregateListField = resolveAggregateListField(this, resource, method, itemIndex);
+			let fetchedCount = 0;
 
-			if (Array.isArray(payload)) {
-				for (const item of payload) {
-					returnData.push({ json: item as IDataObject });
+			for (let pageOffset = 0; pageOffset < maxPages; pageOffset++) {
+				const pageNo = startPageNo + pageOffset;
+				const response = await callWdtApi(
+					client,
+					method,
+					request,
+					{
+						...options,
+						pager: {
+							pageNo,
+							pageSize,
+							calcTotal: options.pager?.calcTotal ?? false,
+						},
+					},
+					this,
+					itemIndex,
+					{
+						WdtApiError,
+						WdtHttpError,
+						WdtResponseParseError,
+					},
+				);
+				const payload = payloadFromResponse(response, throwOnApiError);
+				const pageItems = aggregateListField
+					? extractAggregateListField(response, payload, aggregateListField, this, itemIndex)
+					: undefined;
+
+				if (pageItems) {
+					pushPayload(returnData, pageItems, { _pageNo: pageNo });
+				} else {
+					pushPayload(returnData, payload, { _pageNo: pageNo });
 				}
-			} else if (payload && typeof payload === 'object') {
-				returnData.push({ json: payload as IDataObject });
-			} else {
-				returnData.push({ json: { value: payload as string | number | boolean | null } });
+
+				const pageInfo = extractPageInfo(response, payload, pageItems);
+				fetchedCount += pageInfo.itemCount;
+
+				if (pageInfo.totalCount !== undefined && fetchedCount >= pageInfo.totalCount) {
+					break;
+				}
+				if (pageInfo.itemCount < pageSize) {
+					break;
+				}
 			}
 		}
 
@@ -448,6 +566,18 @@ function resolveMethod(ctx: IExecuteFunctions, resource: string, itemIndex: numb
 		throw new NodeOperationError(ctx.getNode(), '请选择一个接口操作。', { itemIndex });
 	}
 	return method;
+}
+
+function resolveAggregateListField(
+	ctx: IExecuteFunctions,
+	resource: string,
+	method: string,
+	itemIndex: number,
+): string {
+	const fallback = WDT_ENDPOINT_FIELDS[method]?.defaultAggregateListField ?? '';
+	const fieldName =
+		resource === CUSTOM_RESOURCE ? 'aggregateListField' : aggregateListFieldName(method);
+	return (ctx.getNodeParameter(fieldName, itemIndex, fallback) as string).trim();
 }
 
 function resolveRequestBody(
@@ -502,4 +632,160 @@ function parseJsonBody(ctx: IExecuteFunctions, fieldName: string, itemIndex: num
 			},
 		);
 	}
+}
+
+async function callWdtApi(
+	client: {
+		call: (
+			method: string,
+			request?: WdtRequestBody,
+			options?: WdtCallOptionsLike,
+		) => Promise<unknown>;
+	},
+	method: string,
+	request: unknown,
+	options: WdtCallOptionsLike,
+	ctx: IExecuteFunctions,
+	itemIndex: number,
+	errors: {
+		WdtApiError: new (...args: never[]) => Error & { status?: number };
+		WdtHttpError: new (...args: never[]) => Error;
+		WdtResponseParseError: new (...args: never[]) => Error;
+	},
+): Promise<unknown> {
+	try {
+		return await client.call(method, request as WdtRequestBody, options);
+	} catch (error) {
+		if (
+			error instanceof errors.WdtApiError ||
+			error instanceof errors.WdtHttpError ||
+			error instanceof errors.WdtResponseParseError
+		) {
+			throw new NodeOperationError(ctx.getNode(), error.message, {
+				itemIndex,
+				description:
+					error instanceof errors.WdtApiError
+						? `旺店通返回业务错误（status=${error.status}）。`
+						: '与旺店通 OpenAPI 通信失败。',
+			});
+		}
+		throw error;
+	}
+}
+
+interface WdtCallOptionsLike {
+	throwOnApiError: boolean;
+	pager?: { pageNo: number; pageSize: number; calcTotal: boolean };
+}
+
+function payloadFromResponse(response: unknown, throwOnApiError: boolean): unknown {
+	return throwOnApiError && response && typeof response === 'object' && 'data' in response
+		? (response as { data?: unknown }).data
+		: response;
+}
+
+function pushPayload(
+	returnData: INodeExecutionData[],
+	payload: unknown,
+	metadata?: IDataObject,
+): void {
+	if (Array.isArray(payload)) {
+		for (const item of payload) {
+			returnData.push({ json: attachMetadata(item, metadata) });
+		}
+	} else if (payload && typeof payload === 'object') {
+		returnData.push({ json: attachMetadata(payload, metadata) });
+	} else {
+		returnData.push({
+			json: {
+				value: payload as string | number | boolean | null,
+				...(metadata ?? {}),
+			},
+		});
+	}
+}
+
+function attachMetadata(value: unknown, metadata?: IDataObject): IDataObject {
+	if (!metadata) return value as IDataObject;
+	if (value && typeof value === 'object' && !Array.isArray(value)) {
+		return { ...(value as IDataObject), ...metadata };
+	}
+	return { value: value as string | number | boolean | null, ...metadata };
+}
+
+function extractPageInfo(
+	response: unknown,
+	payload: unknown,
+	pageItems?: unknown[],
+): { itemCount: number; totalCount?: number } {
+	const data =
+		response && typeof response === 'object' && 'data' in response
+			? (response as { data?: unknown }).data
+			: payload;
+	const totalCount = findTotalCount(data);
+	return {
+		itemCount: pageItems ? pageItems.length : countPageItems(data),
+		totalCount,
+	};
+}
+
+function findTotalCount(value: unknown): number | undefined {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+	const totalCount = (value as Record<string, unknown>).totalCount;
+	return typeof totalCount === 'number' ? totalCount : undefined;
+}
+
+function countPageItems(value: unknown): number {
+	if (Array.isArray(value)) return value.length;
+	if (!value || typeof value !== 'object') return 0;
+
+	const arrayLengths = Object.values(value as Record<string, unknown>)
+		.filter((entry): entry is unknown[] => Array.isArray(entry))
+		.map((entry) => entry.length);
+
+	return arrayLengths.length > 0 ? Math.max(...arrayLengths) : 0;
+}
+
+function extractAggregateListField(
+	response: unknown,
+	payload: unknown,
+	fieldPath: string,
+	ctx: IExecuteFunctions,
+	itemIndex: number,
+): unknown[] {
+	const payloadValue = getValueAtPath(payload, fieldPath);
+	const value =
+		payloadValue !== undefined
+			? payloadValue
+			: getValueAtPath(
+					response && typeof response === 'object' && 'data' in response
+						? (response as { data?: unknown }).data
+						: undefined,
+					fieldPath,
+				);
+
+	if (!Array.isArray(value)) {
+		throw new NodeOperationError(ctx.getNode(), `聚合列表字段不是数组：${fieldPath}`, {
+			itemIndex,
+			description: '请确认该字段存在于响应 data 中，并且字段值是数组。',
+		});
+	}
+
+	return value;
+}
+
+function getValueAtPath(value: unknown, fieldPath: string): unknown {
+	if (!fieldPath) return undefined;
+	const segments = fieldPath
+		.split('.')
+		.map((segment) => segment.trim())
+		.filter(Boolean);
+	let current = value;
+	for (const segment of segments) {
+		if (!current || typeof current !== 'object' || Array.isArray(current)) {
+			return undefined;
+		}
+		current = (current as Record<string, unknown>)[segment];
+	}
+	return current;
 }
