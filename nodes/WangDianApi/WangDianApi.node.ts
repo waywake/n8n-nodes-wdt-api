@@ -91,8 +91,8 @@ function aggregateListFieldName(method: string): string {
 	return `${AGGREGATE_LIST_FIELD_NAME_PREFIX}${methodToSuffix(method)}`;
 }
 
-function defaultValueForType(type: WdtFieldDef['type']): string | number | boolean {
-	switch (type) {
+function defaultValueForField(field: WdtFieldDef): string | number | boolean {
+	switch (field.type) {
 		case 'string':
 			return '';
 		case 'number':
@@ -100,6 +100,9 @@ function defaultValueForType(type: WdtFieldDef['type']): string | number | boole
 		case 'boolean':
 			return false;
 		case 'json':
+			if (/\[\]$|^Array</.test(field.tsType)) {
+				return '[]';
+			}
 			return '{}';
 	}
 }
@@ -136,7 +139,7 @@ function buildParamField(opt: WdtEndpointOption): INodeProperties {
 			displayName: field.optional ? field.displayName : `${field.displayName} *`,
 			name: field.name,
 			type: field.type,
-			default: defaultValueForType(field.type),
+			default: defaultValueForField(field),
 			description: `${field.description || field.displayName}${requiredHint}${tsHint}`,
 		};
 		if (field.type === 'json') {
@@ -605,13 +608,54 @@ function resolveRequestBody(
 		raw && typeof raw === 'object' && 'values' in raw ? raw.values : {}
 	) as IDataObject;
 
+	if (meta.requestShape === 'tuple') {
+		return meta.fields.map((field) => {
+			const value = cleanStructuredValue(ctx, field, values[field.name], itemIndex);
+			if (isEmptyValue(value) && !field.optional) {
+				throw new NodeOperationError(ctx.getNode(), `请求参数 ${field.displayName} 不能为空。`, {
+					itemIndex,
+				});
+			}
+			return value;
+		});
+	}
+
 	// Strip empty-string defaults so we don't send noise to the API.
 	const cleaned: Record<string, unknown> = {};
-	for (const [key, value] of Object.entries(values)) {
-		if (value === '' || value === null || value === undefined) continue;
-		cleaned[key] = value;
+	for (const field of meta.fields) {
+		const value = cleanStructuredValue(ctx, field, values[field.name], itemIndex);
+		if (isEmptyValue(value)) continue;
+		cleaned[field.name] = value;
 	}
 	return cleaned;
+}
+
+function cleanStructuredValue(
+	ctx: IExecuteFunctions,
+	field: WdtFieldDef,
+	value: unknown,
+	itemIndex: number,
+): unknown {
+	if (field.type !== 'json' || typeof value !== 'string') {
+		return value;
+	}
+	const trimmed = value.trim();
+	if (!trimmed) return undefined;
+	try {
+		return JSON.parse(trimmed);
+	} catch (error) {
+		throw new NodeOperationError(
+			ctx.getNode(),
+			`请求参数 ${field.displayName} 不是合法 JSON：${(error as Error).message}`,
+			{
+				itemIndex,
+			},
+		);
+	}
+}
+
+function isEmptyValue(value: unknown): boolean {
+	return value === '' || value === null || value === undefined;
 }
 
 function parseJsonBody(ctx: IExecuteFunctions, fieldName: string, itemIndex: number): unknown {

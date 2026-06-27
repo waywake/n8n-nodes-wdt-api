@@ -1,6 +1,6 @@
 {
   "name": "@waywake/n8n-nodes-wdt-api",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "WangDian API for n8n",
   "keywords": [
     "n8n-community-node-package"
@@ -59,6 +59,6 @@
     "n8n-workflow": "*"
   },
   "dependencies": {
-    "@waywake/wdt-sdk": "^0.1.4"
+    "@waywake/wdt-sdk": "^0.1.5"
   }
 }

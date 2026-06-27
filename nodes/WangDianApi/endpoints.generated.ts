@@ -45,6 +45,8 @@ export interface WdtFieldDef {
 export interface WdtEndpointParams {
 	/** True when the request type is unstructured (WdtRequestBody) — fall back to a raw JSON editor. */
 	fallbackToJson: boolean;
+	/** Request container shape expected by the SDK. Tuple requests must be assembled in field order. */
+	requestShape: 'object' | 'tuple';
 	/** Parsed field definitions, in declaration order. Empty when fallbackToJson is true or the interface has no own members. */
 	fields: WdtFieldDef[];
 	/** Best-effort default array field to aggregate for auto-pagination. Empty when no response array field is declared. */
@@ -1770,6 +1772,7 @@ export const WDT_ENDPOINT_OPTIONS: WdtEndpointOption[] = [
 export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	'purchase.PurchaseOrder.updatePurchaseInfo': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -1792,6 +1795,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -1871,20 +1875,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.cancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'purchaseNo',
 				displayName: 'Purchase No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '采购单号',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseOrder.cancelByType': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -1916,6 +1922,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseOrder.pending': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
@@ -1924,12 +1931,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'json',
 				optional: false,
 				tsType: 'unknown[]',
-				description: '采购单号',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseOrder.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -2130,6 +2138,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.Purchase.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -2216,6 +2225,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Purchase.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -2271,42 +2281,45 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Purchase.cancel': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinNo',
 				displayName: 'Stockin No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '采购入库单号',
+				description: '',
 			},
 		],
 	},
 	'wms.stockin.Purchase.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinOrder',
 				displayName: 'Stockin Order',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '入库单单据信息',
+				optional: false,
+				tsType: 'WdtWmsStockinPurchaseUploadRequestStockinOrder',
+				description: '',
 			},
 			{
 				name: 'stockinDetailList',
 				displayName: 'Stockin Detail List',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '入库单明细信息',
+				optional: false,
+				tsType: 'WdtWmsStockinPurchaseUploadRequestStockinDetailList[]',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseApply.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -2337,6 +2350,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseApply.upload': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -2392,34 +2406,37 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseApply.cancelForApi': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'applyList',
 				displayName: 'Apply List',
 				type: 'json',
-				optional: true,
+				optional: false,
 				tsType: 'unknown[]',
-				description: '采购申请单号',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseApply.stopForApi': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'applyList',
 				displayName: 'Apply List',
 				type: 'json',
-				optional: true,
+				optional: false,
 				tsType: 'unknown[]',
-				description: '采购申请单号',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.PurchaseReturn.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -2483,6 +2500,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.PurchaseReturn.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -2490,21 +2508,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Order Info',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '采购退货出库单据信息',
+				tsType: 'WdtWmsStockoutPurchaseReturnCreateOrderRequestOrderInfo',
+				description: '',
 			},
 			{
 				name: 'detailList',
 				displayName: 'Detail List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '采购退货出库单明细信息',
+				tsType: 'WdtWmsStockoutPurchaseReturnCreateOrderRequestDetailList[]',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseReturn.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -2559,20 +2578,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.PurchaseReturn.cancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'returnNo',
 				displayName: 'Return No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '采购退货单号',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseReturn.pending': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
@@ -2581,12 +2602,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'json',
 				optional: false,
 				tsType: 'unknown[]',
-				description: '采购退货单号',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseReturn.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -2594,16 +2616,16 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Order Info',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '采购退货单单据信息',
+				tsType: 'WdtPurchasePurchaseReturnCreateOrderRequestOrderInfo',
+				description: '',
 			},
 			{
 				name: 'detailList',
 				displayName: 'Detail List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '采购退货单明细信息',
+				tsType: 'WdtPurchasePurchaseReturnCreateOrderRequestDetailList[]',
+				description: '',
 			},
 			{
 				name: 'isCheck',
@@ -2611,26 +2633,28 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'boolean',
 				optional: false,
 				tsType: 'boolean',
-				description: '是否审核',
+				description: '',
 			},
 		],
 	},
 	'purchase.PurchaseReturn.batchCancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
 				name: 'returnNos',
 				displayName: 'Return Nos',
 				type: 'json',
-				optional: true,
+				optional: false,
 				tsType: 'unknown[]',
-				description: '采购退货单号',
+				description: '',
 			},
 		],
 	},
 	'finance.settle.Purchase.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -2638,8 +2662,8 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Settle Order',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '单据信息',
+				tsType: 'WdtFinanceSettlePurchaseUploadRequestSettleOrder',
+				description: '',
 			},
 			{
 				name: 'detailList',
@@ -2647,12 +2671,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'json',
 				optional: false,
 				tsType: 'unknown[]',
-				description: '明细信息',
+				description: '',
 			},
 		],
 	},
 	'finance.settle.PurchaseReturn.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -2660,8 +2685,8 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Settle Order',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '单据信息',
+				tsType: 'WdtFinanceSettlePurchaseReturnUploadRequestSettleOrder',
+				description: '',
 			},
 			{
 				name: 'detailList',
@@ -2669,12 +2694,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'json',
 				optional: false,
 				tsType: 'unknown[]',
-				description: '明细信息',
+				description: '',
 			},
 		],
 	},
 	'purchase.ProviderGoods.queryDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'details',
 		fields: [
 			{
@@ -2729,6 +2755,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'purchase.ProviderGoods.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'errorList',
 		fields: [
 			{
@@ -2736,13 +2763,14 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Purchase Provider Goods List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '供应商货品明细',
+				tsType: 'WdtPurchaseProviderGoodsUploadRequestPurchaseProviderGoodsList[]',
+				description: '',
 			},
 		],
 	},
 	'purchase.StockInPreOrder.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -2773,6 +2801,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.getTradeMergedLog': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'logList',
 		fields: [
 			{
@@ -2795,6 +2824,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.LogisticsSync.getSyncListExt': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -2850,6 +2880,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.CustomAttr.getTradeLabel': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -2872,6 +2903,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3025,6 +3057,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.querySelfOrderWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3170,62 +3203,67 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeEdit.modifyRemark': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'data',
 				displayName: 'Data',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '请求参数',
+				optional: false,
+				tsType: 'WdtSalesTradeEditModifyRemarkRequestData',
+				description: '',
 			},
 		],
 	},
 	'sales.TradeQuery.getLog': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
 				name: 'tradeNo',
 				displayName: 'Trade No',
-				type: 'string',
-				optional: true,
-				tsType: 'string',
-				description: '订单编号',
+				type: 'json',
+				optional: false,
+				tsType: 'Record<string, unknown>',
+				description: '',
 			},
 		],
 	},
 	'sales.TradeQuery.getLog2': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'result',
 		fields: [
 			{
 				name: 'tradeNo',
 				displayName: 'Trade No',
-				type: 'string',
-				optional: true,
-				tsType: 'string',
-				description: '订单编号，多个订单编号之间用英文逗号隔开',
+				type: 'json',
+				optional: false,
+				tsType: 'Record<string, unknown>',
+				description: '',
 			},
 		],
 	},
 	'sales.TradeEdit.toException': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'tradeNo',
 				displayName: 'Trade No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '订单编号',
+				description: '',
 			},
 		],
 	},
 	'finance.invoice.InvoiceOrder.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3281,11 +3319,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.invoice.InvoiceOrder.updateInvoice': {
 		fallbackToJson: true,
+		requestShape: 'object',
 		fields: [],
 		defaultAggregateListField: '',
 	},
 	'sales.StockSync.getSelfWaitSyncIdListOpen': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'idList',
 		fields: [
 			{
@@ -3308,6 +3348,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.syncSuccess': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -3330,6 +3371,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.calcStock': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -3353,6 +3395,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.batchCalcStock': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'successDate',
 		fields: [
 			{
@@ -3376,6 +3419,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.syncFail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -3398,6 +3442,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.queryHistoryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3501,6 +3546,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeQuery.queryHistorySelfOrderWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3596,6 +3642,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.queryHistoryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3660,6 +3707,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.searchHistory': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3714,6 +3762,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.searchHistorySelfOrder': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3768,6 +3817,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.AlipayAccountCheck.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3814,6 +3864,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.RawPayment.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -3868,6 +3919,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.RawPayment.push': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -3882,6 +3934,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.StockSync.cancelSync': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -3904,6 +3957,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.Payment.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -3950,6 +4004,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.searchLogistics': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -4021,20 +4076,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.LogisticsSync.update': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'syncList',
 				displayName: 'Sync List',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '同步信息列表',
+				optional: false,
+				tsType: 'WdtSalesLogisticsSyncUpdateRequestSyncList[]',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.Sales.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -4188,6 +4245,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.searchPositionDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -4234,6 +4292,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.Payment.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'paymentList',
 		fields: [
 			{
@@ -4304,6 +4363,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.searchCancel': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -4326,20 +4386,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeImport.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'tradeList',
 				displayName: 'Trade List',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '订单列表',
+				optional: false,
+				tsType: 'WdtSalesTradeImportUploadRequestTradeList[]',
+				description: '',
 			},
 		],
 	},
 	'sales.RawTrade.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -4402,6 +4464,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.searchSelfOrder': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -4456,6 +4519,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.pushSelf': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -4494,6 +4558,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.RawTrade.pushSelf2': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'errorList',
 		fields: [
 			{
@@ -4532,160 +4597,164 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Sales.weighingExt': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'logisticsOrTradeNo',
 				displayName: 'Logistics Or Trade No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '物流单号或者出库单号',
+				description: '',
 			},
 			{
 				name: 'packageBarcode',
 				displayName: 'Package Barcode',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '如果没有, 可传""',
+				description: '',
 			},
 			{
 				name: 'weight',
 				displayName: 'Weight',
 				type: 'number',
-				optional: true,
+				optional: false,
 				tsType: 'number',
-				description: '包裹重量',
+				description: '',
 			},
 			{
 				name: 'packagerId',
 				displayName: 'Packager Id',
 				type: 'number',
-				optional: true,
+				optional: false,
 				tsType: 'number',
-				description: '无打包员则传0',
+				description: '',
 			},
 			{
 				name: 'force',
 				displayName: 'Force',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: '默认传false',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.Sales.onceWeighing': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'logisticsOrTradeNo',
 				displayName: 'Logistics Or Trade No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '物流单号或者出库单号',
+				description: '',
 			},
 			{
 				name: 'packageBarcode',
 				displayName: 'Package Barcode',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '如果没有, 可传""',
+				description: '',
 			},
 			{
 				name: 'weight',
 				displayName: 'Weight',
 				type: 'number',
-				optional: true,
+				optional: false,
 				tsType: 'number',
-				description: '包裹重量',
+				description: '',
 			},
 			{
 				name: 'packagerId',
 				displayName: 'Packager Id',
 				type: 'number',
-				optional: true,
+				optional: false,
 				tsType: 'number',
-				description: '无打包员则传0',
+				description: '',
 			},
 			{
 				name: 'operateTableName',
 				displayName: 'Operate Table Name',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '无打包台信息, 则传空字符串',
+				description: '',
 			},
 			{
 				name: 'force',
 				displayName: 'Force',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: '默认传false',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.Sales.onceWeighingByNo': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'logisticsOrTradeNo',
 				displayName: 'Logistics Or Trade No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '物流单号或者出库单号',
+				description: '',
 			},
 			{
 				name: 'packageBarcode',
 				displayName: 'Package Barcode',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '如果没有, 可传""',
+				description: '',
 			},
 			{
 				name: 'weight',
 				displayName: 'Weight',
 				type: 'number',
-				optional: true,
+				optional: false,
 				tsType: 'number',
-				description: '包裹重量',
+				description: '',
 			},
 			{
 				name: 'packagerNo',
 				displayName: 'Packager No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '必须为系统内已存在的员工编号',
+				description: '',
 			},
 			{
 				name: 'operateTableName',
 				displayName: 'Operate Table Name',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '无打包台信息, 则传空字符串',
+				description: '',
 			},
 			{
 				name: 'force',
 				displayName: 'Force',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: '默认传false',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.Sales.salesWeighing': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -4772,6 +4841,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.jit.JitRefund.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -4802,6 +4872,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Goods.queryWithSpec': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'goodsList',
 		fields: [
 			{
@@ -4872,6 +4943,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.GoodsClass.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -4902,6 +4974,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Goods.batchPush': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -4909,13 +4982,14 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Goods Info',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '货品信息',
+				tsType: 'WdtGoodsGoodsBatchPushRequestGoodsInfo[]',
+				description: '',
 			},
 		],
 	},
 	'goods.GoodsBrand.upload': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -4954,6 +5028,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Goods.push': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -4961,21 +5036,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Goods Info',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '货品信息',
+				tsType: 'WdtGoodsGoodsPushRequestGoodsInfo',
+				description: '',
 			},
 			{
 				name: 'specInfoList',
 				displayName: 'Spec Info List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '规格信息列表',
+				tsType: 'WdtGoodsGoodsPushRequestSpecInfoList[]',
+				description: '',
 			},
 		],
 	},
 	'goods.Goods.push2': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'specInfoList',
 		fields: [
 			{
@@ -4983,21 +5059,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Goods Info',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '货品信息',
+				tsType: 'WdtGoodsGoodsPush2RequestGoodsInfo',
+				description: '',
 			},
 			{
 				name: 'specInfoList',
 				displayName: 'Spec Info List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '规格信息列表',
+				tsType: 'WdtGoodsGoodsPush2RequestSpecInfoList[]',
+				description: '',
 			},
 		],
 	},
 	'goods.GoodsBrand.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -5036,6 +5113,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.ApiGoods.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'goodsList',
 		fields: [
 			{
@@ -5082,6 +5160,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.ApiGoods.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'recIds',
 		fields: [
 			{
@@ -5089,13 +5168,14 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Param',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '平台货品数据',
+				tsType: 'WdtGoodsApiGoodsUploadRequestParam',
+				description: '',
 			},
 		],
 	},
 	'goods.Category.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'categoryList',
 		fields: [
 			{
@@ -5126,6 +5206,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'process.Process.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -5181,6 +5262,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'process.Process.upload': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -5235,6 +5317,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.process.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -5281,6 +5364,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Barcode.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'errorList',
 		fields: [
 			{
@@ -5288,13 +5372,14 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Barcode Info List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '业务请求参数',
+				tsType: 'WdtGoodsBarcodeUploadRequestBarcodeInfoList[]',
+				description: '',
 			},
 		],
 	},
 	'process.Bom.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -5329,10 +5414,27 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				tsType: 'boolean',
 				description: '是：true 否：false 默认false',
 			},
+			{
+				name: 'materialSpecNo',
+				displayName: 'Material Spec No',
+				type: 'string',
+				optional: true,
+				tsType: 'string',
+				description: '原料商家编码',
+			},
+			{
+				name: 'productSpecNo',
+				displayName: 'Product Spec No',
+				type: 'string',
+				optional: true,
+				tsType: 'string',
+				description: '成品商家编码',
+			},
 		],
 	},
 	'process.Bom.upload': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -5371,6 +5473,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.GoodsClass.upload': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -5401,6 +5504,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Suite.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'suiteList',
 		fields: [
 			{
@@ -5487,6 +5591,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'goods.Suite.upload2': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -5517,6 +5622,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Warehouse.queryWarehouse': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'details',
 		fields: [
 			{
@@ -5581,6 +5687,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Address.districtSearch': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -5611,6 +5718,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Address.provinceSearch': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -5633,6 +5741,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Address.citySearch': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -5663,6 +5772,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Shop.queryShop': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'details',
 		fields: [
 			{
@@ -5685,6 +5795,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Shop.updateShop': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -5787,6 +5898,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.PurchaseProvider.queryDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'details',
 		fields: [
 			{
@@ -5889,20 +6001,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.PurchaseProvider.push': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'provider',
 				displayName: 'Provider',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '供应商',
+				optional: false,
+				tsType: 'WdtSettingPurchaseProviderPushRequestProvider',
+				description: '',
 			},
 		],
 	},
 	'setting.OperationReason.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -5925,6 +6039,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Logistics.queryLogistics': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'details',
 		fields: [
 			{
@@ -5963,6 +6078,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.warehouseSearch': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -6001,6 +6117,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.query': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -6023,6 +6140,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'sales.TradeEdit.uploadChangeGoodsByApi': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -6069,6 +6187,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.Employee.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -6099,6 +6218,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockShelve.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -6153,6 +6273,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Base.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -6217,6 +6338,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'statistic.StockoutCollect.queryCostWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -6255,6 +6377,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Base.searchSN': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -6285,50 +6408,53 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Base.uploadSN': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockoutNo',
 				displayName: 'Stockout No',
-				type: 'string',
-				optional: true,
-				tsType: 'string',
-				description: '出库单号',
+				type: 'json',
+				optional: false,
+				tsType: 'Record<string, unknown>',
+				description: '',
 			},
 			{
 				name: 'orderType',
 				displayName: 'Order Type',
-				type: 'number',
-				optional: true,
-				tsType: 'number',
-				description: '2：调拨出库5：生产原料出库 14：采购退货出库21：其他出库',
+				type: 'json',
+				optional: false,
+				tsType: 'unknown[]',
+				description: '',
 			},
 		],
 	},
 	'wms.StockPd.stockSyncByPd': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'pdOrder',
 				displayName: 'Pd Order',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '盘点单信息',
+				optional: false,
+				tsType: 'WdtWmsStockPdStockSyncByPdRequestPdOrder',
+				description: '',
 			},
 			{
 				name: 'specList',
 				displayName: 'Spec List',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '盘点单明细，可以为空',
+				optional: false,
+				tsType: 'WdtWmsStockPdStockSyncByPdRequestSpecList[]',
+				description: '',
 			},
 		],
 	},
 	'finance.StockCost.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -6367,6 +6493,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'finance.settle.Logistics.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -6397,6 +6524,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Transfer.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -6460,36 +6588,38 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Transfer.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
 				displayName: 'Order Info',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '调拨出库单单据信息',
+				optional: false,
+				tsType: 'WdtWmsStockoutTransferCreateOrderRequestOrderInfo',
+				description: '',
 			},
 			{
 				name: 'detailList',
 				displayName: 'Detail List',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '调拨出库单明细信息',
+				optional: false,
+				tsType: 'WdtWmsStockoutTransferCreateOrderRequestDetailList[]',
+				description: '',
 			},
 			{
 				name: 'isCheck',
 				displayName: 'Is Check',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: '是否审核（ 低优先级 ）',
+				description: '',
 			},
 		],
 	},
 	'wms.stocktransfer.Manage.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -6553,48 +6683,52 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Transfer.cancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'transferOutNo',
 				displayName: 'Transfer Out No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '调拨出库单号',
+				description: '',
 			},
 		],
 	},
 	'wms.stocktransfer.Manage.cancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'transferNo',
 				displayName: 'Transfer No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '调拨单号',
+				description: '',
 			},
 		],
 	},
 	'wms.stockin.Transfer.cancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'transferInNo',
 				displayName: 'Transfer In No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '调拨入库单号',
+				description: '',
 			},
 		],
 	},
 	'wms.stocktransfer.Manage.pending': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'errorInfo',
 		fields: [
 			{
@@ -6603,7 +6737,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'json',
 				optional: false,
 				tsType: 'unknown[]',
-				description: '调拨单号',
+				description: '',
 			},
 			{
 				name: 'isback',
@@ -6611,42 +6745,44 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'boolean',
 				optional: false,
 				tsType: 'boolean',
-				description: '是否将已出库但未入库的数量进行入库',
+				description: '',
 			},
 		],
 	},
 	'wms.stocktransfer.Edit.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
 				displayName: 'Order Info',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '调拨单单据信息',
+				optional: false,
+				tsType: 'WdtWmsStocktransferEditCreateOrderRequestOrderInfo',
+				description: '',
 			},
 			{
 				name: 'detailList',
 				displayName: 'Detail List',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '调拨单明细信息',
+				optional: false,
+				tsType: 'WdtWmsStocktransferEditCreateOrderRequestDetailList[]',
+				description: '',
 			},
 			{
 				name: 'isCheck',
 				displayName: 'Is Check',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: '是否审核 审核：true 不审核：false',
+				description: '',
 			},
 		],
 	},
 	'finance.settle.Transfer.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -6718,6 +6854,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Transfer.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -6773,36 +6910,38 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Transfer.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
 				displayName: 'Order Info',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '调拨入库单单据信息',
+				optional: false,
+				tsType: 'WdtWmsStockinTransferCreateOrderRequestOrderInfo',
+				description: '',
 			},
 			{
 				name: 'detailList',
 				displayName: 'Detail List',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '调拨入库单明细信息',
+				optional: false,
+				tsType: 'WdtWmsStockinTransferCreateOrderRequestDetailList[]',
+				description: '',
 			},
 			{
 				name: 'isCheck',
 				displayName: 'Is Check',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: '是否审核（ 低优先级 ）V1.4.9.1版本以上非必传',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.SalesPick.pickListOverviewForApi': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'pickGoodsDataList',
 		fields: [
 			{
@@ -6811,12 +6950,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'string',
 				optional: false,
 				tsType: 'string',
-				description: '波次单编号',
+				description: '',
 			},
 		],
 	},
 	'wms.ErrorCorrection.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'result',
 		fields: [
 			{
@@ -6871,6 +7011,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.queryAvailableStock': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'stocks',
 		fields: [
 			{
@@ -6917,6 +7058,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.queryChangeHistory': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -6971,6 +7113,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -7035,6 +7178,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.search2': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -7099,6 +7243,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockSpec.stockDetailSearch': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -7123,6 +7268,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.PositionCapacity.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -7169,6 +7315,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.queryStockPdOutDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -7231,6 +7378,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.queryStockPd': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'pdList',
 		fields: [
 			{
@@ -7302,20 +7450,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.StockPd.queryStockPdDetail': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'pdDetailList',
 		fields: [
 			{
 				name: 'pdNo',
 				displayName: 'Pd No',
-				type: 'string',
-				optional: true,
-				tsType: 'string',
-				description: '系统盘点单编号，默认PD开头',
+				type: 'json',
+				optional: false,
+				tsType: 'Record<string, unknown>',
+				description: '',
 			},
 		],
 	},
 	'wms.StockPd.queryStockPdInDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -7379,6 +7529,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.GoodsBatch.createByApi': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -7401,6 +7552,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.OtherQuery.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -7472,42 +7624,45 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Other.cancelOtherOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderNo',
 				displayName: 'Order No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '出库单号',
+				description: '',
 			},
 			{
 				name: 'isForce',
 				displayName: 'Is Force',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: 'false:仅可以取未确认状态 true:待审核的单据会先返回编辑然后再取消',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.Other.createOther': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockoutOrder',
 				displayName: 'Stockout Order',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '出库单单据信息',
+				optional: false,
+				tsType: 'WdtWmsStockoutOtherCreateOtherRequestStockoutOrder',
+				description: '',
 			},
 		],
 	},
 	'wms.stockother.OutQuery.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -7571,6 +7726,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.Out.push': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -7578,35 +7734,37 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Order',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '单据数据',
+				tsType: 'WdtWmsStockotherOutPushRequestOrder',
+				description: '',
 			},
 			{
 				name: 'orderDetails',
 				displayName: 'Order Details',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '单据明细',
+				tsType: 'WdtWmsStockotherOutPushRequestOrderDetails[]',
+				description: '',
 			},
 		],
 	},
 	'wms.stockother.Out.cancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'successData',
 		fields: [
 			{
 				name: 'orderNoList',
 				displayName: 'Order No List',
 				type: 'json',
-				optional: true,
+				optional: false,
 				tsType: 'unknown[]',
-				description: '业务单号',
+				description: '',
 			},
 		],
 	},
 	'wms.stockin.Other.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -7678,42 +7836,45 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Other.cancelOtherOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderNo',
 				displayName: 'Order No',
 				type: 'string',
-				optional: true,
+				optional: false,
 				tsType: 'string',
-				description: '入库单号',
+				description: '',
 			},
 			{
 				name: 'isForce',
 				displayName: 'Is Force',
 				type: 'boolean',
-				optional: true,
+				optional: false,
 				tsType: 'boolean',
-				description: 'false:仅可以取消编辑中状态 true:待审核的单据会先返回编辑然后再取消',
+				description: '',
 			},
 		],
 	},
 	'wms.stockin.Other.createOtherOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinOrder',
 				displayName: 'Stockin Order',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '入库单单据信息',
+				optional: false,
+				tsType: 'WdtWmsStockinOtherCreateOtherOrderRequestStockinOrder',
+				description: '',
 			},
 		],
 	},
 	'wms.stockother.InQuery.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -7777,6 +7938,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockother.In.push': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -7784,35 +7946,37 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Order',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '单据数据',
+				tsType: 'WdtWmsStockotherInPushRequestOrder',
+				description: '',
 			},
 			{
 				name: 'orderDetails',
 				displayName: 'Order Details',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '单据明细',
+				tsType: 'WdtWmsStockotherInPushRequestOrderDetails[]',
+				description: '',
 			},
 		],
 	},
 	'wms.stockother.In.cancelOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'successData',
 		fields: [
 			{
 				name: 'orderNoList',
 				displayName: 'Order No List',
 				type: 'json',
-				optional: true,
+				optional: false,
 				tsType: 'unknown[]',
-				description: '业务单号',
+				description: '',
 			},
 		],
 	},
 	'finance.settle.OtherIn.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -7820,21 +7984,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Order Info',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '单据信息',
+				tsType: 'WdtFinanceSettleOtherInUploadRequestOrderInfo',
+				description: '',
 			},
 			{
 				name: 'detailList',
 				displayName: 'Detail List',
 				type: 'json',
-				optional: true,
+				optional: false,
 				tsType: 'unknown[]',
-				description: '明细信息',
+				description: '',
 			},
 		],
 	},
 	'wms.stockin.Base.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -7898,6 +8063,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'statistic.StockinCollect.queryCostWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -7944,6 +8110,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Base.searchSN': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -7974,28 +8141,30 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Base.uploadSN': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'stockinNo',
 				displayName: 'Stockin No',
-				type: 'string',
-				optional: true,
-				tsType: 'string',
-				description: '入库单号',
+				type: 'json',
+				optional: false,
+				tsType: 'Record<string, unknown>',
+				description: '',
 			},
 			{
 				name: 'orderType',
 				displayName: 'Order Type',
-				type: 'number',
-				optional: true,
-				tsType: 'number',
-				description: '2：调拨入库6：生产成品入库 20：其他入库',
+				type: 'json',
+				optional: false,
+				tsType: 'unknown[]',
+				description: '',
 			},
 		],
 	},
 	'wms.stockout.Process.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -8059,6 +8228,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Process.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -8122,6 +8292,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterOut.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -8193,6 +8364,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterOut.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -8200,16 +8372,16 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Order',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '单据数据',
+				tsType: 'WdtWmsOuterOuterOutCreateOrderRequestOrder',
+				description: '',
 			},
 			{
 				name: 'orderDetails',
 				displayName: 'Order Details',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '单据明细',
+				tsType: 'WdtWmsOuterOuterOutCreateOrderRequestOrderDetails[]',
+				description: '',
 			},
 			{
 				name: 'isCheck',
@@ -8217,12 +8389,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'boolean',
 				optional: false,
 				tsType: 'boolean',
-				description: '审核：true 不审核：false',
+				description: '',
 			},
 		],
 	},
 	'wms.outer.OuterIn.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -8294,6 +8467,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterIn.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -8316,6 +8490,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.outer.OuterTransfer.createByApi': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -8371,6 +8546,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.GoodsPack.upload': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -8433,6 +8609,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.orderSearch': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -8479,6 +8656,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.create': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -8486,21 +8664,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Order Map',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '单据信息',
+				tsType: 'WdtSettingStrategyVirtualWarehouseCreateRequestOrderMap',
+				description: '',
 			},
 			{
 				name: 'detailList',
 				displayName: 'Detail List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '明细信息',
+				tsType: 'WdtSettingStrategyVirtualWarehouseCreateRequestDetailList[]',
+				description: '',
 			},
 		],
 	},
 	'setting.strategy.VirtualWarehouse.stockSearch': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'detailList',
 		fields: [
 			{
@@ -8547,6 +8726,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.strategyAllocationQuery': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -8594,6 +8774,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.strategyAllocationCreate': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -8664,28 +8845,30 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'setting.strategy.VirtualWarehouse.reserveExtractAdd': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
 				name: 'orderInfo',
 				displayName: 'Order Info',
 				type: 'json',
-				optional: true,
-				tsType: 'Record<string, unknown>',
-				description: '策略信息',
+				optional: false,
+				tsType: 'WdtSettingStrategyVirtualWarehouseReserveExtractAddRequestOrderInfo',
+				description: '',
 			},
 			{
 				name: 'detail',
 				displayName: 'Detail',
 				type: 'json',
-				optional: true,
-				tsType: 'unknown[]',
-				description: '策略明细信息',
+				optional: false,
+				tsType: 'WdtSettingStrategyVirtualWarehouseReserveExtractAddRequestDetail[]',
+				description: '',
 			},
 		],
 	},
 	'wms.MoveOrder.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -8749,6 +8932,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockdefect.DefectChange.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -8795,6 +8979,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.Pack.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -8851,6 +9036,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockout.JitOrder.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -8873,6 +9059,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.JitRefund.searchOrderWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'orderList',
 		fields: [
 			{
@@ -8895,6 +9082,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.GoodsSN.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'snList',
 		fields: [
 			{
@@ -8990,6 +9178,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.PreStockin.createExt': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -8997,21 +9186,22 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Stockin Order',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '入库单信息',
+				tsType: 'WdtWmsStockinPreStockinCreateExtRequestStockinOrder',
+				description: '',
 			},
 			{
 				name: 'specList',
 				displayName: 'Spec List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '入库单明细，不能为为空',
+				tsType: 'WdtWmsStockinPreStockinCreateExtRequestSpecList[]',
+				description: '',
 			},
 		],
 	},
 	'wms.stockin.SmartRefund.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -9019,16 +9209,16 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Refund Info',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '退货信息',
+				tsType: 'WdtWmsStockinSmartRefundUploadRequestRefundInfo',
+				description: '',
 			},
 			{
 				name: 'detailMapList',
 				displayName: 'Detail Map List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '退货货品详细信息',
+				tsType: 'WdtWmsStockinSmartRefundUploadRequestDetailMapList[]',
+				description: '',
 			},
 			{
 				name: 'createPreStockin',
@@ -9036,12 +9226,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'boolean',
 				optional: false,
 				tsType: 'boolean',
-				description: '是否允许退货货品数量大于购买数量',
+				description: '',
 			},
 		],
 	},
 	'aftersales.refund.Refund.searchHistory': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -9096,6 +9287,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Refund.queryHisWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -9182,6 +9374,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.RawRefund.searchHistory': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -9268,6 +9461,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.Refund.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -9476,6 +9670,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Refund.queryWithDetail': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -9594,6 +9789,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.Refund.createOrder': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -9601,13 +9797,14 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				displayName: 'Stockin Order',
 				type: 'json',
 				optional: false,
-				tsType: 'Record<string, unknown>',
-				description: '入库单据信息',
+				tsType: 'WdtWmsStockinRefundCreateOrderRequestStockinOrder',
+				description: '',
 			},
 		],
 	},
 	'wms.stockin.Refund.returnLogisticsPackageQuery': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'record',
 		fields: [
 			{
@@ -9646,11 +9843,13 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'wms.stockin.PreStockin.cancel': {
 		fallbackToJson: true,
+		requestShape: 'object',
 		fields: [],
 		defaultAggregateListField: '',
 	},
 	'wms.stockin.PreStockin.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -9793,6 +9992,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.RawRefund.search': {
 		fallbackToJson: false,
+		requestShape: 'object',
 		defaultAggregateListField: 'order',
 		fields: [
 			{
@@ -9888,6 +10088,7 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 	},
 	'aftersales.refund.RawRefund.upload': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: '',
 		fields: [
 			{
@@ -9896,20 +10097,21 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'string',
 				optional: false,
 				tsType: 'string',
-				description: '店铺编号',
+				description: '',
 			},
 			{
 				name: 'orderList',
 				displayName: 'Order List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '原始退款单列表',
+				tsType: 'WdtAftersalesRefundRawRefundUploadRequestOrderList[]',
+				description: '',
 			},
 		],
 	},
 	'aftersales.refund.RawRefund.upload2': {
 		fallbackToJson: false,
+		requestShape: 'tuple',
 		defaultAggregateListField: 'errorList',
 		fields: [
 			{
@@ -9918,15 +10120,15 @@ export const WDT_ENDPOINT_FIELDS: Record<string, WdtEndpointParams> = {
 				type: 'string',
 				optional: false,
 				tsType: 'string',
-				description: '店铺编号',
+				description: '',
 			},
 			{
 				name: 'orderList',
 				displayName: 'Order List',
 				type: 'json',
 				optional: false,
-				tsType: 'unknown[]',
-				description: '原始退款单列表',
+				tsType: 'WdtAftersalesRefundRawRefundUpload2RequestOrderList[]',
+				description: '',
 			},
 		],
 	},
